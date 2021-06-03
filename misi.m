@@ -2,7 +2,7 @@ clear
 % [audioorg, fs] = detectVoiced('audio.wav',1);
 
 [audioorg,fs] = audioread('audio.wav');
- 
+ tic 
 audioorg = audioorg(:,1);
 mergeDist = round(0.6*fs);
 
@@ -48,7 +48,7 @@ ylabel('Pitch (Hz)')
 title('Pitch Estimations')
 axis tight
 
-midi = freq2midi2(f0);
+midi = round(((log(f0*32/440)/log(2))*12)+9);
 
 figure;
 
@@ -62,8 +62,13 @@ deviceWriter = audioDeviceWriter('SampleRate',48000);
 msgs = [midimsg('Note',channel,31,110,0.01,0)];  
 iter = 1; 
 prevTime = 0;
- for i = 2:length(midi)
-    
+
+ 
+ time = zeros(length(midi));
+ dur = zeros(length(midi));
+
+for i = 2:length(midi)
+        
     if midi(i) == midi(i-1) 
         continue;
     end
@@ -126,6 +131,7 @@ for i = 1:length(msgs)
    
 end
 
+toc 
 i = 1;
 recorded = zeros(length(audioorg),1);
     %signalProper = [signalProper; osc()];

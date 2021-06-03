@@ -3,29 +3,50 @@ classdef NoiseGater
     properties
         inputSignal
         outputSignal
+        sampleRate
     end
     
     methods 
-        function performNoiseGate(obj)
+        
+        function obj = NoiseGater(input)
+            
+            if ~isequal(nargin, 1)
+                obj.inputSignal = input;
+                obj.outputSignal = zeros(length(obj.inputSignal),1);
+            else
+                throw MException
+            end
             
         end
-    end
-    [audioorg,fs] = audioread('audio.wav');
- 
-audioorg = audioorg(:,1);
-mergeDist = round(0.6*fs);
+        
+        function obj = set.inputSignal(obj, input)
+           
+            if isnumeric(input)
+                obj.inputSignal = input;
+            else 
+                
+            end
+            
+        end
+        
+        function performNoiseGate(obj)
+             
+            obj.inputSignal = obj.inputSignal(:,1);
+            mergeDist = round(0.6*fs);
 
-speechIndices = detectSpeech(audioorg,fs, 'Window',hann(512,'periodic'),'OverlapLength',200, ...
-    'MergeDistance', mergeDist);
-audio = [];
-audio(1:speechIndices(1,1),1) = 0;
-for ii = 1:size(speechIndices,1)
-    audio = [audio;audioorg(speechIndices(ii,1):speechIndices(ii,2))];
-    if ii == size(speechIndices,1)
-        audio(speechIndices(ii,2)+1:size(audioorg),1) = 0;
-    else
-        audio(speechIndices(ii,2)+1:speechIndices(ii+1,1)-1,1) = 0;
+            voiceIndices = detectSpeech(obj.inputSignal, obj.sampleRate, ...
+                'Window',hann(512,'periodic'), 'OverlapLength',200, ...
+                'MergeDistance', mergeDist);
+            obj.outputSignal(1:voiceIndices(1,1),1) = 0;
+            for ii = 1:size(voiceIndices,1)
+                obj.outputSignal = [obj.outputSignal; obj.inputSignal(voiceIndices(ii,1):voiceIndices(ii,2))];
+                if ii == size(voiceIndices,1)
+                    obj.outputSignal(voiceIndices(ii,2)+1:size(obj.inputSignal),1) = 0;
+                else
+                    obj.outputSignal(voiceIndices(ii,2)+1:voiceIndices(ii+1,1)-1,1) = 0;
+                end
+            end            
+        end
     end
-end
 
 end
