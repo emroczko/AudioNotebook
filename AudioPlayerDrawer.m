@@ -1,4 +1,0 @@
-classdef AudioPlayerDrawer < PlayerDrawer
-    
-    
-end
