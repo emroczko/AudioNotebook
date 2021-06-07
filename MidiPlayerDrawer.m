@@ -1,4 +1,0 @@
-classdef MidiPlayerDrawer < PlayerDrawer
-    
-    
-end
