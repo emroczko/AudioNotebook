@@ -8,14 +8,9 @@ classdef PitchExtractor
     
     properties
         
-        function findPitchs(obj)
+        function findPitch(obj, audio)
         
-            t = (0:size(audio,1)-1)/fs;
-
-            hoursPerDay = fs/100;
-            coeff24hMA = ones(1, hoursPerDay)/hoursPerDay;
-
-            audio = filter(coeff24hMA, 1, audio);
+            
 
             winLength = round(0.04*fs);
             overlapLength = round(0.03*fs);

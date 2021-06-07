@@ -9,14 +9,7 @@ classdef NoiseGater
     methods 
         
         function obj = NoiseGater(input)
-            
-            if ~isequal(nargin, 1)
-                obj.inputSignal = input;
-                obj.outputSignal = zeros(length(obj.inputSignal),1);
-            else
-                throw MException
-            end
-            
+            obj.signalInitializer(input);
         end
         
         function obj = set.inputSignal(obj, input)
@@ -45,7 +38,36 @@ classdef NoiseGater
                 else
                     obj.outputSignal(voiceIndices(ii,2)+1:voiceIndices(ii+1,1)-1,1) = 0;
                 end
-            end            
+            end 
+
+            obj.filterSignal();
+        end
+        
+        function updateAndPerformNoiseGate(obj, audio)
+            obj.signalInitializer(audio);
+            obj.performNoiseGate();
+        end
+       
+    end
+    
+    methods (Access = private)
+        
+        function obj = filterSignal()
+            hoursPerDay = fs/100;
+            coeff24hMA = ones(1, hoursPerDay)/hoursPerDay;
+
+            audio = filter(coeff24hMA, 1, audio);
+        end
+        function obj = signalInitializer(obj, input)
+            if (nargin == 1)
+                obj.inputSignal = input;
+                obj.outputSignal = zeros(length(obj.inputSignal),1);
+            elseif (nargin == 0)
+                obj.inputSignal = [];
+                obj.outputSignal = [];
+            else
+                throw MException
+            end
         end
     end
 
