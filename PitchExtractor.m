@@ -1,20 +1,15 @@
 classdef PitchExtractor
-   
     
-    methods 
-        
+    properties (Access = private)
+       sampleRate = 96000 
     end
-    
-    
-    properties
-        
-        function findPitch(obj, audio)
-        
-            
 
-            winLength = round(0.04*fs);
-            overlapLength = round(0.03*fs);
-            [f0,idx] = pitch(audio,fs, ...
+    methods 
+        function [f0, idx] = findPitch(obj, audio)
+        
+            winLength = round(0.04*obj.sampleRate);
+            overlapLength = round(0.03*obj.sampleRate);
+            [f0,idx] = pitch(audio,obj.sampleRate, ...
                 'Method', 'PEF', ...
                 'Range', [50, 400], ...
                 'WindowLength',winLength, ...
@@ -23,7 +18,7 @@ classdef PitchExtractor
 
             f0 =  smoothdata(f0,'gaussian',20);
 
-            tf0 = idx/fs;
+           % tf0 = idx/fs;
         end
     end
 end

@@ -1,15 +1,23 @@
-classdef NoiseGater
+classdef NoiseGater < handle
     
     properties
         inputSignal
         outputSignal
-        sampleRate
+        sampleRate = 96000;
     end
     
     methods 
         
-        function obj = NoiseGater(input)
-            obj.signalInitializer(input);
+        function obj = NoiseGater(varargin)
+            if (nargin == 1)
+                obj.inputSignal = input;
+                obj.outputSignal = zeros(length(obj.inputSignal),1);
+            elseif (nargin == 0)
+                obj.inputSignal = [];
+                obj.outputSignal = [];
+            else
+                throw MException
+            end
         end
         
         function obj = set.inputSignal(obj, input)
@@ -25,7 +33,7 @@ classdef NoiseGater
         function performNoiseGate(obj)
              
             obj.inputSignal = obj.inputSignal(:,1);
-            mergeDist = round(0.6*fs);
+            mergeDist = round(0.6*obj.sampleRate);
 
             voiceIndices = detectSpeech(obj.inputSignal, obj.sampleRate, ...
                 'Window',hann(512,'periodic'), 'OverlapLength',200, ...
@@ -43,8 +51,9 @@ classdef NoiseGater
             obj.filterSignal();
         end
         
-        function updateAndPerformNoiseGate(obj, audio)
-            obj.signalInitializer(audio);
+        function updateAndPerformNoiseGate(obj, input)
+            obj.inputSignal = input;
+            obj.outputSignal = zeros(length(obj.inputSignal),1);
             obj.performNoiseGate();
         end
        
@@ -52,23 +61,13 @@ classdef NoiseGater
     
     methods (Access = private)
         
-        function obj = filterSignal()
-            hoursPerDay = fs/100;
-            coeff24hMA = ones(1, hoursPerDay)/hoursPerDay;
+        function obj = filterSignal(obj)
+            coeffLength = obj.sampleRate/100;
+            coeffs = ones(1, coeffLength)/coeffLength;
 
-            audio = filter(coeff24hMA, 1, audio);
+            obj.outputSignal = filter(coeffs, 1, obj.outputSignal);
         end
-        function obj = signalInitializer(obj, input)
-            if (nargin == 1)
-                obj.inputSignal = input;
-                obj.outputSignal = zeros(length(obj.inputSignal),1);
-            elseif (nargin == 0)
-                obj.inputSignal = [];
-                obj.outputSignal = [];
-            else
-                throw MException
-            end
-        end
+
     end
 
 end

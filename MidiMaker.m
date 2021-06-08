@@ -1,10 +1,7 @@
-classdef MidiMaker
+classdef MidiMaker < handle
     
-    properties (Access = private)
+    properties 
         MidiFrequencies
-        Track1MIDI
-        Track2MIDI
-        
     end
     
     methods
@@ -12,19 +9,19 @@ classdef MidiMaker
             
         end
         
-        function obj = freqToMidi(obj)
+        function obj = freqToMidi(obj, f)
             obj.MidiFrequencies = round(((log(f*32/440)/log(2))*12)+9);
         end 
         
-        function createMIDIMessages(obj, idx)
+        function msgs = createMIDIMessages(obj, f0, idx)
             
-            freqToMidi();
+            obj.freqToMidi(f0); 
             
             iter = 1;
             channel = 1;
             velocity = 90;
-            time = zeros(length(obj.MidiFrequencies, 1));
-            duration = zeros(length(obj.MidiFrequencies, 1));
+            time = zeros(length(obj.MidiFrequencies));
+            duration = zeros(length(obj.MidiFrequencies));
             
             for i = 2:length(obj.MidiFrequencies)
     
