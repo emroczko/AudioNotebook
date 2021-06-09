@@ -17,9 +17,9 @@ classdef MidiHandler < handle
         function obj = convertAudioToMidi(obj, audio, track)
             obj.noiseGater.updateAndPerformNoiseGate(audio);
             [f, id] = obj.pitchExtractor.findPitch(obj.noiseGater.outputSignal);
-            midi = obj.midiMaker.createMIDIMessages(f, id);
+            midi = obj.midiMaker.createMIDIMessages(f, id, audio);
             
-            switch track
+            switch (track)
                 case 1
                     obj.Track1Midi = midi;
                 case 2

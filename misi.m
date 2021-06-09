@@ -64,8 +64,8 @@ iter = 1;
 prevTime = 0;
 
  
- time = zeros(length(midi));
- dur = zeros(length(midi));
+ time = zeros(length(midi), 1);
+ dur = zeros(length(midi), 1 );
 
 for i = 2:length(midi)
         
@@ -98,17 +98,18 @@ Nsum = 0;
 out = zeros(msgs(1,1).Timestamp*fs,1);
 for i = 1:length(msgs)
     msg = msgs(1,i);
-    if i == length(msgs)
-        msgnext = msgs(1, i);
+    if i == 1
+        msgprev = midimsg('Note',channel,32, vel, 0,0);
+        msgprev = msgprev(1,1);
     else
-        msgnext = msgs(1, i+1);
+        msgprev = msgs(1, i-1);
     end
     
-    N = floor((msgnext.Timestamp-msg.Timestamp)*fs);
-    freq = 440 * 2^((msg.Note-69)/12);
-    shift =  2*pi*mod(shift + dur(i)/fs*freq,1);
+    N = (msg.Timestamp-msgprev.Timestamp).*fs;
+    freq = 440 * 2.^((msgprev.Note-69)/12);
+    %shift =  2.*pi.*mod(shift + (msg.Timestamp-msgprev.Timestamp)./fs.*freq,1);
     Nsum = Nsum + N;
-    k=0:N-1;
+    k=0:N;
 
     if msg.Note < 50
         amplitude = 0;
@@ -116,58 +117,56 @@ for i = 1:length(msgs)
         amplitude = msg.Velocity/127;
     end
 
-    WaveOut = amplitude .* sin(2 * pi * k * freq/fs + shift);
+    WaveOut = amplitude .* sin(2 .* pi .* k .* freq./fs + shift);
      y = WaveOut;
-    if ((msgnext.Timestamp-msg.Timestamp) > .01)
+    if ((msg.Timestamp-msgprev.Timestamp) > .01)
     L = 2*fix(.01*fs)-1;  % L odd
     ramp = bartlett(L)';  % odd length
     L = ceil(L/2);
     y(1:L) = y(1:L) .* ramp(1:L);
     y(end-L+1:end) = y(end-L+1:end) .* ramp(end-L+1:end);
     end
-
-     ksum = [ksum; k.'];
      out = [out; y.'];
    
 end
 
-toc 
-i = 1;
-recorded = zeros(length(audioorg),1);
-    %signalProper = [signalProper; osc()];
-    osc = audioOscillator('SignalType','sine', ...
-   'PhaseOffset',phaseOffset, 'SampleRate',fs); 
-   tic 
-playaudio = audioplayer(1.5.*audioorg, fs) ;
-%play(playaudio);
-
-while toc < msgs(1,length(msgs)).Timestamp
-    if toc > msgs(1,i).Timestamp
-        msg = msgs(1,i);
-        i = i+1;
-        
-        if msg.Velocity ~= 0
-            
-            freq = 440 * 2^((msg.Note-69)/12);
-            osc.Frequency = freq;
-            if msg.Note < 50
-                osc.Amplitude = 0;
-            else
-                osc.Amplitude = msg.Velocity/127;
-            end
-%             phaseOffset = mod(phaseOffset + dur(i-1)/fs*freq,1);
-
-        else
-            osc.Amplitude = 0; 
-        end
-%         signalProper = [signalProper; osc()];
-        
-    end
-    %recorded = [recorded; osc()];
-    deviceWriter(osc());
-    
-   % 
-end
-toc
-%release(deviceWriter)
-% sound(signalProper, fs)
+ toc 
+% i = 1;
+% recorded = zeros(length(audioorg),1);
+%     %signalProper = [signalProper; osc()];
+%     osc = audioOscillator('SignalType','sine', ...
+%    'PhaseOffset',phaseOffset, 'SampleRate',fs); 
+%    tic 
+% playaudio = audioplayer(1.5.*audioorg, fs) ;
+% %play(playaudio);
+% 
+% while toc < msgs(1,length(msgs)).Timestamp
+%     if toc > msgs(1,i).Timestamp
+%         msg = msgs(1,i);
+%         i = i+1;
+%         
+%         if msg.Velocity ~= 0
+%             
+%             freq = 440 * 2^((msg.Note-69)/12);
+%             osc.Frequency = freq;
+%             if msg.Note < 50
+%                 osc.Amplitude = 0;
+%             else
+%                 osc.Amplitude = msg.Velocity/127;
+%             end
+% %             phaseOffset = mod(phaseOffset + dur(i-1)/fs*freq,1);
+% 
+%         else
+%             osc.Amplitude = 0; 
+%         end
+% %         signalProper = [signalProper; osc()];
+%         
+%     end
+%     %recorded = [recorded; osc()];
+%     deviceWriter(osc());
+%     
+%    % 
+% end
+% toc
+% %release(deviceWriter)
+% % sound(signalProper, fs)

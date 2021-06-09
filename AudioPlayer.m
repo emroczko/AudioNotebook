@@ -16,16 +16,29 @@ classdef AudioPlayer < handle
             
        end
        
-       function play(obj, axes1, axes2)
-            obj.Player = audioplayer(obj.AudioSum, 96000);
-            play(obj.Player);
-            ax1 = xline(axes1, 0);
-            ax2 = xline(axes2, 0);
-            while(obj.Player.Running)
-                ax1.Value = obj.Player.currentSample;
-                ax2.Value = obj.Player.currentSample;
-                drawnow;
-            end
+       function empty = isEmpty(obj)
+           if isempty(obj.Track1Audio) && isempty(obj.Track2Audio)
+               empty = true;
+           else
+               empty = false;
+           end 
+       end
+       
+       function playing = play(obj, axes1, axes2)
+           if ~isempty(obj.AudioSum)
+                obj.Player = audioplayer(obj.AudioSum, 96000);
+                play(obj.Player);
+                ax1 = xline(axes1, 0);
+                ax2 = xline(axes2, 0);
+                while(obj.Player.Running)
+                    ax1.Value = obj.Player.currentSample;
+                    ax2.Value = obj.Player.currentSample;
+                    drawnow;
+                end
+                playing = true;
+           else
+               playing = false;
+           end
         end
         
         function stop(obj)

@@ -2,6 +2,12 @@ classdef MidiMaker < handle
     
     properties 
         MidiFrequencies
+        sampleRate = 96000;
+    end
+    
+    properties
+       velocity = 90;
+       channel = 1;
     end
     
     methods
@@ -13,13 +19,16 @@ classdef MidiMaker < handle
             obj.MidiFrequencies = round(((log(f*32/440)/log(2))*12)+9);
         end 
         
-        function msgs = createMIDIMessages(obj, f0, idx)
+        function msgs = createMIDIMessages(obj, f0, idx, audio)
             
             obj.freqToMidi(f0); 
             
+            t = (0:size(audio,1)-1)/obj.sampleRate;
+            
+            
+            prevTime = 0;
+            
             iter = 1;
-            channel = 1;
-            velocity = 90;
             time = zeros(length(obj.MidiFrequencies));
             duration = zeros(length(obj.MidiFrequencies));
             
@@ -30,10 +39,10 @@ classdef MidiMaker < handle
                 end
 
                 time(iter, 1) = t(idx(i)); 
-                velocity = 80;    
+                obj.velocity = 80;    
                 duration(iter, 1) = time(iter, 1) - prevTime;
-                msgs(:,iter) = [midimsg('Note',channel,obj.MidiFrequencies(i),...
-                                velocity,duration(iter,1 ),time(iter, 1))];
+                msgs(:,iter) = [midimsg('Note',obj.channel,obj.MidiFrequencies(i),...
+                                obj.velocity,duration(iter,1 ),time(iter, 1))];
 
                 prevTime = time(iter, 1);
 

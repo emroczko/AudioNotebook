@@ -40,7 +40,7 @@ classdef NoiseGater < handle
                 'MergeDistance', mergeDist);
             obj.outputSignal(1:voiceIndices(1,1),1) = 0;
             for ii = 1:size(voiceIndices,1)
-                obj.outputSignal = [obj.outputSignal; obj.inputSignal(voiceIndices(ii,1):voiceIndices(ii,2))];
+                obj.outputSignal(voiceIndices(ii,1):voiceIndices(ii,2),1) = obj.inputSignal(voiceIndices(ii,1):voiceIndices(ii,2),1);
                 if ii == size(voiceIndices,1)
                     obj.outputSignal(voiceIndices(ii,2)+1:size(obj.inputSignal),1) = 0;
                 else
