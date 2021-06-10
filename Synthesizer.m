@@ -1,17 +1,24 @@
-classdef Synthesizer < handle
+classdef Synthesizer
     
     properties
         sampleRate = 96000;
+        currentSynth = "Sine";
+        
     end
     
-    
     methods
+        function obj = set.currentSynth(obj, synth)
+            if ischar(synth)
+                obj.currentSynth = synth;
+            else
+               error("Synth type must be a string"); 
+            end
+        end
+        
         function out = createAudio(obj, msgs)
            
             shift = 0;
- 
-
-            out = zeros(msgs(1,1).Timestamp*obj.sampleRate,1);
+            out = [];
             
             for i = 1:length(msgs)
                 msg = msgs(1,i);
@@ -33,9 +40,8 @@ classdef Synthesizer < handle
                     amplitude = msg.Velocity/127;
                 end
             
-                y = amplitude .* sin(2 .* pi .* k .* freq/obj.sampleRate + shift);
-
-
+                y = obj.synthesize(amplitude, k, shift, freq);
+                
                 if ((msg.Timestamp-msgprev.Timestamp) > .01)
                     y = obj.smoothOutput(y);
                 end
@@ -48,13 +54,26 @@ classdef Synthesizer < handle
     
     methods (Access = private)
         
+        function y = synthesize(obj, amplitude, k, shift, freq)
+            switch obj.currentSynth
+                
+                case "Sine"
+                    y = amplitude .* sin(2 .* pi .* k .* freq/obj.sampleRate + shift);
+                case "Square"
+                    y = amplitude .* square(2 .* pi .* k .* freq/obj.sampleRate + shift);
+                case "Sawtooth"
+                    y = amplitude .* sawtooth(2 .* pi .* k .* freq/obj.sampleRate + shift);
+                otherwise
+                    y = amplitude .* sin(2 .* pi .* k .* freq/obj.sampleRate + shift);
+            end
+        end
+        
         function y = smoothOutput(obj, y)            
                L = 2*fix(.01*obj.sampleRate)-1; 
                 ramp = bartlett(L)';  
                 L = ceil(L/2);
                 y(1:L) = y(1:L) .* ramp(1:L);
                 y(end-L+1:end) = y(end-L+1:end) .* ramp(end-L+1:end);
- 
         end
     end
 end

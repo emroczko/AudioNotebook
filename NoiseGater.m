@@ -1,4 +1,6 @@
 classdef NoiseGater < handle
+    % Klasa NoiseGater pozwalająca na filtrację sygnału i wycięcie zbyt
+    % cichych fragmentów sygnałów. 
     
     properties
         inputSignal
@@ -10,7 +12,7 @@ classdef NoiseGater < handle
         
         function obj = NoiseGater(varargin)
             if (nargin == 1)
-                obj.inputSignal = input;
+                obj.inputSignal = varargin{1};
                 obj.outputSignal = zeros(length(obj.inputSignal),1);
             elseif (nargin == 0)
                 obj.inputSignal = [];
@@ -64,7 +66,6 @@ classdef NoiseGater < handle
         function obj = filterSignal(obj)
             coeffLength = obj.sampleRate/100;
             coeffs = ones(1, coeffLength)/coeffLength;
-
             obj.outputSignal = filter(coeffs, 1, obj.outputSignal);
         end
 
