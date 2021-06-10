@@ -53,11 +53,11 @@ classdef AudioRecorder < handle
         
         function obj = record(obj, axes, track)
             record(obj.recorder);
-            while obj.recorder.isrecording()
-                pause(1);
-                plot(axes, obj.recorder.getaudiodata());
-                drawnow();
-            end
+                while obj.recorder.isrecording() && ~obj.isdeleted(obj.recorder)
+                    pause(1);
+                    plot(axes, obj.recorder.getaudiodata());
+                    drawnow();
+                end
             switch (track)
                 case 1
                 obj.rawTrack1Audio = obj.recorder.getaudiodata();
@@ -69,6 +69,21 @@ classdef AudioRecorder < handle
         function obj = stopRecording(obj)
             stop(obj.recorder);
         end
+        
+        
+    end
+    
+    methods (Access = private)
+        function tf=isdeleted(obj, h)
+            tf=false;
+            try
+                get(h);
+            catch ME
+                if strcmp(ME.identifier,'MATLAB:class:InvalidHandle')
+                    tf=true;
+                end
+            end
+        end 
     end
 end
 

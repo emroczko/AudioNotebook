@@ -9,7 +9,6 @@ classdef MidiHandler < handle
     end
     properties (Access = private)
         noiseGater
-        pitchExtractor
         midiMaker
         midiDrawer
     end
@@ -34,14 +33,13 @@ classdef MidiHandler < handle
         
         function obj = MidiHandler()
             obj.noiseGater = NoiseGater();
-            obj.pitchExtractor = PitchExtractor();
             obj.midiMaker = MidiMaker();
             obj.midiDrawer = MidiDrawer();
         end
         
         function obj = convertAudioToMidi(obj, audio, track)
             obj.noiseGater.updateAndPerformNoiseGate(audio);
-            [f, id] = obj.pitchExtractor.findPitch(obj.noiseGater.outputSignal);
+            [f, id] = PitchExtractor.findPitch(obj.noiseGater.outputSignal);
             midi = obj.midiMaker.createMIDIMessages(f, id, audio);
             
             switch (track)
@@ -52,7 +50,7 @@ classdef MidiHandler < handle
             end
         end
         
-        function obj = drawMidiPlot(obj, axes, track)
+        function drawMidiPlot(obj, axes, track)
             switch (track)
                 case 1
                     obj.midiDrawer.drawMidiPlot(obj.track1Midi, axes);

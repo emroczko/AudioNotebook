@@ -69,7 +69,7 @@ classdef AudioPlayer < handle
         
         function set.sampleRate(obj, sampleRate)
             if isnumeric(sampleRate) && sampleRate > 80 && sampleRate < 1000000 
-               obj.sampleRate = sampleRate; 
+                obj.sampleRate = sampleRate; 
             else
                 error("Sample rate must be a positive number between 80 and 1000000")
             end
@@ -87,7 +87,8 @@ classdef AudioPlayer < handle
         % Public methods
        
        function empty = isEmpty(obj)
-           if isempty(obj.Track1Audio) && isempty(obj.Track2Audio)
+           if (isempty(obj.Track1Audio) || all(obj.Track1Audio == 0)) ...
+                   && (isempty(obj.Track2Audio)|| all(obj.Track2Audio == 0))
                empty = true;
            else
                empty = false;
@@ -97,16 +98,21 @@ classdef AudioPlayer < handle
        function play(obj, axes1, axes2)
            if ~isempty(obj.AudioSum)
                 obj.player = audioplayer(obj.AudioSum, obj.sampleRate);
-                play(obj.player);
-                ax1 = xline(axes1, 0);
-                ax2 = xline(axes2, 0);
-                while(isplaying(obj.player))
-                    ax1.Value = obj.player.currentSample;
-                    ax2.Value = obj.player.currentSample;
-                    drawnow;
+                try
+                    play(obj.player);
+                    ax1 = xline(axes1, 0);
+                    ax2 = xline(axes2, 0);
+                    while(isplaying(obj.player))
+                        ax1.Value = obj.player.currentSample;
+                        ax2.Value = obj.player.currentSample;
+                        drawnow;
+                    end
+                    delete(ax1);
+                    delete(ax2);
+                catch
+                    obj.stop()
+                    warning("Audioplayer error")
                 end
-                delete(ax1);
-                delete(ax2);
            else
                error("There is no signal to play")
            end

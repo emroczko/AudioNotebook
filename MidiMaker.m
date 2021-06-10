@@ -1,25 +1,25 @@
 classdef MidiMaker < handle
+    % Klasa MidiMaker tworząca 
     
     properties 
         MidiFrequencies
-        sampleRate = 96000;
     end
     
-    properties
-       velocity = 90;
+    properties (Access = private)
+       velocity = 70;
        channel = 1;
+       sampleRate = 96000;
     end
     
     methods
-        function obj = MidiMaker()
-            
-        end
-        
+
         function obj = freqToMidi(obj, f)
             obj.MidiFrequencies = round(((log(f*32/440)/log(2))*12)+9);
         end 
         
         function msgs = createMIDIMessages(obj, f0, idx, audio)
+            
+            obj.MidiFrequencies = zeros(length(f0),1);
             
             obj.freqToMidi(f0); 
             

@@ -2,22 +2,13 @@ classdef PitchExtractor
     % Klasa PitchExtractor znajdująca wektor częstotliwości z danego pliku
     % audio oraz "wygładzająca" go. 
     
-    properties (Access = private)
-       sampleRate = 96000 
-       windowLength
-       
-    end
-
-    methods 
-        function obj = PitchExtractor()
+    methods (Static) 
+        function [frequencies, idx] = findPitch(audio)
             
-        end
-        
-        function [frequencies, idx] = findPitch(obj, audio)
-        
-            winLength = round(0.04*obj.sampleRate);
-            overlapLength = round(0.03*obj.sampleRate);
-            [frequencies,idx] = pitch(audio,obj.sampleRate, ...
+            sampleRate = 96000;
+            winLength = round(0.04*sampleRate);
+            overlapLength = round(0.03*sampleRate);
+            [frequencies,idx] = pitch(audio, sampleRate, ...
                 'Method', 'PEF', ...
                 'Range', [50, 700], ...
                 'WindowLength',winLength, ...

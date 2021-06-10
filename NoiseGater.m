@@ -22,12 +22,22 @@ classdef NoiseGater < handle
             end
         end
         
-        function obj = set.inputSignal(obj, input)
+        function set.inputSignal(obj, input)
            
             if isnumeric(input)
                 obj.inputSignal = input;
             else 
-                
+                error("input signal must be a numeric vector")
+            end
+            
+        end
+        
+        function set.outputSignal(obj, input)
+           
+            if isnumeric(input)
+                obj.outputSignal = input;
+            else 
+                error("output signal must be a numeric vector")
             end
             
         end
